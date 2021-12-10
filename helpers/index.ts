@@ -22,8 +22,8 @@ export function inputAsNumberArray(...paths: string[]): number[] {
 // String array grouped by blank lines
 export function inputAsGroupedStringArray(...paths: string[]): string[][] {
 	const array = inputAsStringArray(...paths)
-	const groups = []
-	let group = []
+	const groups: string[][] = []
+	let group: string[] = []
 	const finaliseGroup = () => {
 		groups.push([...group])
 		group = []
@@ -44,7 +44,7 @@ export function clamp(n: number, min: number, max: number): number {
 
 export function sumEach<T>(
 	array: T[],
-	condition: (item: T) => boolean | number
+	condition: (item: T) => boolean | number = (item) => Number(item)
 ): number {
 	return array.reduce((acc, item) => acc + Number(condition(item)), 0)
 }
@@ -52,32 +52,13 @@ export function sumEach<T>(
 export function everyPair<T>(array: T[]): [T, T][] {
 	const pairs = []
 	const length = array.length
-	if (length < 2) return
+	if (length < 2) return []
 	for (let i = 0; i < length - 1; i++) {
 		for (let j = i + 1; j < length; j++) {
-			pairs.push([array[i], array[j]])
+			pairs.push([array[i], array[j]] as [T, T])
 		}
 	}
 	return pairs
-}
-
-export type FixedArray<T, L extends number, TObj = [T, ...Array<T>]> = TObj & {
-	readonly length: L
-}
-
-export function multiEnumerate<L extends number>(
-	ranges: FixedArray<[number, number], L>
-) {
-	let combos = []
-	for (const [min, max] of ranges) {
-		const newCombos = []
-		for (let i = min; i <= max; i++) {
-			if (combos.length) newCombos.push(...combos.map((c) => [...c, i]))
-			else newCombos.push([i])
-		}
-		combos = newCombos
-	}
-	return combos as FixedArray<number, L>[]
 }
 
 // Trigonometry
