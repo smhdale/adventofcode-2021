@@ -52,11 +52,6 @@
       "yarn lint --fix"
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "volta": {
     "node": "16.13.1"
   }
