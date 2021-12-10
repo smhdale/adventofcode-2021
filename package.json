@@ -1,13 +1,13 @@
 {
   "name": "adventofcode-2021",
   "version": "1.0.0",
-  "main": "index.js",
   "repository": "https://github.com/smhdale/adventofcode-2021",
   "author": "Samuel Dale <smhdale@live.com.au>",
   "license": "Unlicense",
   "scripts": {
     "prepare": "husky install",
-    "day": "bin/index.ts",
+    "init": "bin/init-day.ts",
+    "day": "bin/run-day.ts",
     "lint": "eslint . --ext ts"
   },
   "dependencies": {
