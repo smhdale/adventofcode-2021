@@ -1,12 +1,13 @@
-import { inputAsNumberArray, sumEach, logAnswer } from "../helpers";
+import { inputAsNumberArray, sumEach, logAnswer } from '../helpers'
 
 // Setup
 const nums = inputAsNumberArray(__dirname, 'input.txt')
 
 // Helpers
-const countIncreases = (arr: number[]) => arr.reduce((acc, num, index) => {
-	return acc + (index > 0 && num > arr[index - 1] ? 1 : 0)
-}, 0)
+const countIncreases = (arr: number[]) =>
+	arr.reduce((acc, num, index) => {
+		return acc + (index > 0 && num > arr[index - 1] ? 1 : 0)
+	}, 0)
 
 // Part A
 logAnswer('A', countIncreases(nums))
