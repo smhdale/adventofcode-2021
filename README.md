@@ -12,9 +12,12 @@ npm install
 ---
 
 ### **Running the code**
-Also pretty simple:
 ```sh
-npm run day [number]
+# Bootstrap files for a new day's solution
+npm run init [day number]
+
+# Run the code for a day's solution
+npm run day [day number]
 ```
 
 ---
