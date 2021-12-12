@@ -6,13 +6,17 @@ import chalk from 'chalk'
 
 export function input(...paths: string[]): string {
 	const target = resolve(...paths)
-	return String(readFileSync(target))
+	return String(readFileSync(target)).trim()
+}
+
+export function inputAsNumberCSV(...paths: string[]): number[] {
+	return input(...paths)
+		.split(',')
+		.map(Number)
 }
 
 export function inputAsStringArray(...paths: string[]): string[] {
-	return input(...paths)
-		.trim()
-		.split(/\r?\n/)
+	return input(...paths).split(/\r?\n/)
 }
 
 export function inputAsNumberArray(...paths: string[]): number[] {

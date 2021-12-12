@@ -1,8 +1,7 @@
-import { input, logAnswer } from '../helpers'
+import { inputAsNumberCSV, logAnswer } from '../helpers'
 
 // Setup
-const getInitialConditions = (file: string) =>
-	input(__dirname, file).split(',').map(Number)
+const getInitialConditions = (file: string) => inputAsNumberCSV(__dirname, file)
 const initialConditions = getInitialConditions('input.txt')
 
 // Part A
