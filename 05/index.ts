@@ -1,4 +1,3 @@
-import { isParameter } from 'typescript'
 import { inputAsStringArray, logAnswer } from '../helpers'
 
 // Setup
