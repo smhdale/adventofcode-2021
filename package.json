@@ -38,7 +38,8 @@
       "prettier"
     ],
     "rules": {
-      "prettier/prettier": 2
+      "prettier/prettier": 2,
+      "no-constant-condition": "off"
     }
   },
   "prettier": {

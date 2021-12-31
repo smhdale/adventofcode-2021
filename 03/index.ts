@@ -1,7 +1,7 @@
 import { inputAsStringArray, logAnswer } from '../helpers'
 
 // Setup
-const test = inputAsStringArray(__dirname, 'test.txt')
+// const test = inputAsStringArray(__dirname, 'test.txt')
 const input = inputAsStringArray(__dirname, 'input.txt')
 
 // Part A

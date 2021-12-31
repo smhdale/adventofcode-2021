@@ -23,6 +23,10 @@ export function inputAsNumberArray(...paths: string[]): number[] {
 	return inputAsStringArray(...paths).map(Number)
 }
 
+export function inputAsNumberGrid(...paths: string[]): number[][] {
+	return inputAsStringArray(...paths).map((row) => row.split('').map(Number))
+}
+
 // String array grouped by blank lines
 export function inputAsGroupedStringArray(...paths: string[]): string[][] {
 	const array = inputAsStringArray(...paths)
@@ -90,13 +94,13 @@ export function clone<T>(input: T): T {
 
 // Logging
 
-export function logTest(part: 'A' | 'B', ...logs: any[]) {
+export function logTest(part: 'A' | 'B', ...logs: unknown[]) {
 	console.log(chalk.grey(`Part ${part} test case answer:`))
 	console.log(...logs)
 	console.log()
 }
 
-export function logAnswer(part: 'A' | 'B', ...logs: any[]) {
+export function logAnswer(part: 'A' | 'B', ...logs: unknown[]) {
 	console.log(chalk.green(`Part ${part} answer:`))
 	console.log(...logs)
 	console.log()
