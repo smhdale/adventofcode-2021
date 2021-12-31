@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, openSync, closeSync } from 'fs'
 import { resolve } from 'path'
 
 const day = (process.argv[2] || '').padStart(2, '0')
-const test = ['-t', '--with-test'].includes(process.argv[3])
+const test = ['-t', '--test', '--with-test'].includes(process.argv[3])
 const dir = resolve(__dirname, '..', day)
 
 if (existsSync(dir)) {
