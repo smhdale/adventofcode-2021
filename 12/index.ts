@@ -1,6 +1,6 @@
 import { inputAsStringArray, logAnswer } from '../helpers'
 
-const testMap = inputAsStringArray(__dirname, 'test.txt')
+// const testMap = inputAsStringArray(__dirname, 'test.txt')
 const map = inputAsStringArray(__dirname, 'input.txt')
 
 type NodeType = 'start' | 'end' | 'large' | 'small'
