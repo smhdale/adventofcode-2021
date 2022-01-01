@@ -8,13 +8,6 @@ type Input = {
 type InsertMap = Map<string, string>
 type ElementRecord = Record<string, number>
 
-interface IElement {
-	symbol: string
-	next: IElement | null
-	pair: string | null
-	insert(symbol: string): IElement
-}
-
 const parseInput = (input: string[][]): Input => {
 	const polymer = input[0][0]
 	const rules: InsertMap = new Map()
@@ -28,60 +21,50 @@ const parseInput = (input: string[][]): Input => {
 const testInput = parseInput(inputAsGroupedStringArray(__dirname, 'test.txt'))
 const input = parseInput(inputAsGroupedStringArray(__dirname, 'input.txt'))
 
-const createElement = (symbol: string): IElement => ({
-	symbol,
-	next: null,
-	get pair() {
-		return this.next ? this.symbol + this.next.symbol : null
-	},
-	insert(symbol: string) {
-		const refNext = this.next
-		this.next = createElement(symbol)
-		if (refNext) this.next.next = refNext
-		return this.next
-	},
-})
-
-const createLinkedListPolymer = (polymer: string): IElement => {
-	const [first, ...rest] = polymer.split('')
-	const firstElem = createElement(first)
-	let cursor = firstElem
-	for (const symbol of rest) {
-		cursor = cursor.insert(symbol)
-	}
-	return firstElem
+const countElement = (
+	element: string,
+	record: ElementRecord
+): ElementRecord => {
+	const newRecord = { ...record }
+	if (element in newRecord) newRecord[element]
+	else newRecord[element] = 1
+	return newRecord
 }
 
-const updateLinkedListPolymer = (
-	firstElem: IElement,
-	rules: InsertMap
-): IElement => {
-	let cursor: IElement | null = firstElem
-	while (cursor?.pair) {
-		const newSymbol = rules.get(cursor.pair)
-		if (newSymbol) cursor = cursor.insert(newSymbol)
-		cursor = cursor.next
-	}
-	return firstElem
+const growPolymerPair = (
+	pair: string,
+	rules: InsertMap,
+	record: ElementRecord,
+	depth: number
+): ElementRecord => {
+	const element = rules.get(pair)
+	if (!element) return { ...record }
+
+	// Insert and record new element
+	let localRecord = countElement(element, record)
+	if (element in localRecord) localRecord[element]++
+	else localRecord[element] = 1
+
+	// End here if reached maximum depth
+	if (depth < 1) return localRecord
+
+	// Grow both new sub-polymers
+	const [a, b] = pair.split('')
+	localRecord = growPolymerPair(`${a}${element}`, rules, localRecord, depth - 1)
+	localRecord = growPolymerPair(`${element}${b}`, rules, localRecord, depth - 1)
+	return localRecord
 }
 
-const growLinkedListPolymer = (input: Input, steps: number): IElement => {
-	const firstElem = createLinkedListPolymer(input.polymer)
-	for (let i = 0; i < steps; i++) {
-		updateLinkedListPolymer(firstElem, input.rules)
-	}
-	return firstElem
-}
+const traversePolymer = (input: Input, depth: number): ElementRecord => {
+	let record: ElementRecord = input.polymer.split('').reduce((acc, element) => {
+		return countElement(element, acc)
+	}, {})
 
-const countLinkedListPolymerElements = (firstElem: IElement): ElementRecord => {
-	const record: ElementRecord = {}
-	let cursor = firstElem
-	while (cursor?.next) {
-		const symbol = cursor.symbol
-		if (symbol in record) record[symbol]++
-		else record[symbol] = 1
-		cursor = cursor.next
+	for (let i = 0; i < input.polymer.length - 1; i++) {
+		const pair = input.polymer.substr(i, 2)
+		record = growPolymerPair(pair, input.rules, record, depth)
 	}
+
 	return record
 }
 
@@ -91,8 +74,7 @@ const getElementDifference = (record: ElementRecord): number => {
 }
 
 const calculate = (input: Input, steps: number): number => {
-	const polymer = growLinkedListPolymer(input, steps)
-	const record = countLinkedListPolymerElements(polymer)
+	const record = traversePolymer(input, steps - 1)
 	return getElementDifference(record)
 }
 
