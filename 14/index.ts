@@ -4,8 +4,16 @@ type Input = {
 	polymer: string
 	rules: InsertMap
 }
+
 type InsertMap = Map<string, string>
 type ElementRecord = Record<string, number>
+
+interface IElement {
+	symbol: string
+	next: IElement | null
+	pair: string | null
+	insert(symbol: string): IElement
+}
 
 const parseInput = (input: string[][]): Input => {
 	const polymer = input[0][0]
@@ -20,52 +28,80 @@ const parseInput = (input: string[][]): Input => {
 const testInput = parseInput(inputAsGroupedStringArray(__dirname, 'test.txt'))
 const input = parseInput(inputAsGroupedStringArray(__dirname, 'input.txt'))
 
-const countElements = (polymer: string): ElementRecord => {
+const createElement = (symbol: string): IElement => ({
+	symbol,
+	next: null,
+	get pair() {
+		return this.next ? this.symbol + this.next.symbol : null
+	},
+	insert(symbol: string) {
+		const refNext = this.next
+		this.next = createElement(symbol)
+		if (refNext) this.next.next = refNext
+		return this.next
+	},
+})
+
+const createLinkedListPolymer = (polymer: string): IElement => {
+	const [first, ...rest] = polymer.split('')
+	const firstElem = createElement(first)
+	let cursor = firstElem
+	for (const symbol of rest) {
+		cursor = cursor.insert(symbol)
+	}
+	return firstElem
+}
+
+const updateLinkedListPolymer = (
+	firstElem: IElement,
+	rules: InsertMap
+): IElement => {
+	let cursor: IElement | null = firstElem
+	while (cursor?.pair) {
+		const newSymbol = rules.get(cursor.pair)
+		if (newSymbol) cursor = cursor.insert(newSymbol)
+		cursor = cursor.next
+	}
+	return firstElem
+}
+
+const growLinkedListPolymer = (input: Input, steps: number): IElement => {
+	const firstElem = createLinkedListPolymer(input.polymer)
+	for (let i = 0; i < steps; i++) {
+		updateLinkedListPolymer(firstElem, input.rules)
+	}
+	return firstElem
+}
+
+const countLinkedListPolymerElements = (firstElem: IElement): ElementRecord => {
 	const record: ElementRecord = {}
-	for (let i = 0; i < polymer.length; i++) {
-		const element = polymer[i]
-		if (element in record) record[element]++
-		else record[element] = 1
+	let cursor = firstElem
+	while (cursor?.next) {
+		const symbol = cursor.symbol
+		if (symbol in record) record[symbol]++
+		else record[symbol] = 1
+		cursor = cursor.next
 	}
 	return record
 }
-
-const growPolymer = (polymer: string, rules: InsertMap): string => {
-	let newPolymer = polymer[0]
-	let cursor = 1
-	while (cursor < polymer.length) {
-		const pair = polymer.substr(cursor - 1, 2)
-		const insert = rules.get(pair)
-		if (insert) newPolymer += insert
-		newPolymer += pair[1]
-		cursor++
-	}
-	return newPolymer
-}
-
-const updatePolymer = (input: Input, steps: number): ElementRecord => {
-	let polymer = input.polymer
-	for (let i = 0; i < steps; i++) polymer = growPolymer(polymer, input.rules)
-	return countElements(polymer)
-}
-
-// Part A
 
 const getElementDifference = (record: ElementRecord): number => {
 	const amounts = Object.values(record)
 	return Math.max(...amounts) - Math.min(...amounts)
 }
 
-const testRecordA = updatePolymer(testInput, 10)
-const testDifferenceA = getElementDifference(testRecordA)
-logTest('A', testDifferenceA)
+const calculate = (input: Input, steps: number): number => {
+	const polymer = growLinkedListPolymer(input, steps)
+	const record = countLinkedListPolymerElements(polymer)
+	return getElementDifference(record)
+}
 
-const recordA = updatePolymer(input, 10)
-const differenceA = getElementDifference(recordA)
-logAnswer('A', differenceA)
+// Part A
+
+logTest('A', calculate(testInput, 10))
+logAnswer('A', calculate(input, 10))
 
 // Part B
 
-const recordB = updatePolymer(input, 40)
-const differenceB = getElementDifference(recordB)
-logAnswer('B', differenceB)
+logTest('B', calculate(testInput, 40))
+logAnswer('B', calculate(input, 40))
