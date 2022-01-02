@@ -6,7 +6,13 @@ type Input = {
 }
 
 type InsertMap = Map<string, string>
+type PairRecordMap = Map<string, ElementRecord>
 type ElementRecord = Record<string, number>
+
+type GrowMeta = {
+	rules: InsertMap
+	records: PairRecordMap
+}
 
 const parseInput = (input: string[][]): Input => {
 	const polymer = input[0][0]
@@ -21,48 +27,74 @@ const parseInput = (input: string[][]): Input => {
 const testInput = parseInput(inputAsGroupedStringArray(__dirname, 'test.txt'))
 const input = parseInput(inputAsGroupedStringArray(__dirname, 'input.txt'))
 
-const countElement = (
+const addElementToRecord = (
+	record: ElementRecord,
 	element: string,
-	record: ElementRecord
+	count = 1
 ): ElementRecord => {
 	const newRecord = { ...record }
-	if (element in newRecord) newRecord[element]
-	else newRecord[element] = 1
+	if (element in newRecord) newRecord[element] += count
+	else newRecord[element] = count
 	return newRecord
+}
+
+const addRecords = (a: ElementRecord, b: ElementRecord): ElementRecord => {
+	let c = { ...a }
+	for (const [element, count] of Object.entries(b)) {
+		c = addElementToRecord(c, element, count)
+	}
+	return c
 }
 
 const growPolymerPair = (
 	pair: string,
-	rules: InsertMap,
-	record: ElementRecord,
+	meta: GrowMeta,
 	depth: number
 ): ElementRecord => {
-	const element = rules.get(pair)
-	if (!element) return { ...record }
+	// If this pair at this depth has already been expanded, return the result
+	const key = `${pair}.${depth}`
+	const existing = meta.records.get(key)
+	if (existing) return existing
 
-	// Insert and record new element
-	let localRecord = countElement(element, record)
-	if (element in localRecord) localRecord[element]++
-	else localRecord[element] = 1
+	let record = {}
+	const mergeIntoRecord = (other: ElementRecord): void => {
+		record = addRecords(record, other)
+	}
 
-	// End here if reached maximum depth
-	if (depth < 1) return localRecord
+	const element = meta.rules.get(pair)
+	if (element) {
+		// Insert and record new element
+		record = addElementToRecord(record, element)
 
-	// Grow both new sub-polymers
-	const [a, b] = pair.split('')
-	localRecord = growPolymerPair(`${a}${element}`, rules, localRecord, depth - 1)
-	localRecord = growPolymerPair(`${element}${b}`, rules, localRecord, depth - 1)
-	return localRecord
+		// Grow both new sub-polymers
+		if (depth > 0) {
+			const [a, b] = pair.split('')
+			mergeIntoRecord(growPolymerPair(`${a}${element}`, meta, depth - 1))
+			mergeIntoRecord(growPolymerPair(`${element}${b}`, meta, depth - 1))
+		}
+	}
+
+	// Record this result for later use, then return it
+	meta.records.set(key, record)
+	return record
 }
 
 const traversePolymer = (input: Input, depth: number): ElementRecord => {
 	let record: ElementRecord = input.polymer.split('').reduce((acc, element) => {
-		return countElement(element, acc)
+		return addElementToRecord(acc, element)
 	}, {})
+	const mergeIntoRecord = (other: ElementRecord): void => {
+		record = addRecords(record, other)
+	}
+
+	const meta = {
+		rules: input.rules,
+		records: new Map(),
+	}
 
 	for (let i = 0; i < input.polymer.length - 1; i++) {
 		const pair = input.polymer.substr(i, 2)
-		record = growPolymerPair(pair, input.rules, record, depth)
+		mergeIntoRecord(growPolymerPair(pair, meta, depth))
 	}
 
 	return record
